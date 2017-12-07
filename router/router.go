@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"errors"
 	"github.com/weihualiu/ewp/utils"
+	"github.com/weihualiu/ewp/m"
 )
 
 var (
@@ -17,7 +18,7 @@ type Router struct {
 	CTXType byte  // 内容类型 二进制 JSON XML URL串
 	Encrypt bool
 	CheckValid bool  //session valid
-	Handler func([]byte, *http.Request)([]byte, *utils.Error)
+	Handler func([]byte, *http.Request)(*m.Response, *utils.Error)
 	
 }
 
@@ -30,7 +31,7 @@ func newRouters() {
 }
 
 // 注册路径扩展版
-func RegisterExt(reqpath string, encrypt bool, check bool, handler func([]byte, *http.Request)([]byte, *utils.Error)) error {
+func RegisterExt(reqpath string, encrypt bool, check bool, handler func([]byte, *http.Request)(*m.Response, *utils.Error)) error {
 	newRouters()
 	router := Router{
 		CTXType : CTX_URL,

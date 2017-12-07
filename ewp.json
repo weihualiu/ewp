@@ -1,7 +1,20 @@
 {
-  "debug": false,
-  "http": {
-    "addr": "0.0.0.0:4002",
-    "timeout": 180
-  }
+	"debug": false,
+	"http": {
+	"addr": "0.0.0.0:4002",
+	"timeout": 180
+	}
+	"security":{
+		"verify":false,
+		"server_cert_file":"public/security/bank_server.crt",
+		"oldest_supported_ver":[1,0],
+		"client_verify":{
+			"flag":false,
+			"client_verify_file":"public/security/client_file",
+			"verify_version":[3,4],
+			"pass_version":[0,1,2],
+			"pass_platform":[],
+			"error":"ewp_verify_fail"
+		}
+	}
 }

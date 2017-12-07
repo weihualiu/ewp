@@ -14,9 +14,26 @@ type HttpConfig struct {
 	Timeout int `json:"timeout"`
 }
 
+type ClientVerifyConfig struct {
+	Flag bool `json:"flag"`
+	ClientVerifyPath string `json:"client_verify_file"`
+	VerifyVersion []int `json:"verify_version"`
+	PassVersion []int `json:"pass_version"`
+	PassPlatForm []string `json:"pass_platform"`
+	ErrTips string `json:"error"`
+}
+
+type SecurityConfig struct {
+	Verify bool `json:"verify"`
+	ServerCertPath string `json:"server_cert_file"`
+	OldestVer []int `json:"oldest_supported_ver"`
+	ClientVerify *ClientVerifyConfig `json:"client_verify"`
+}
+
 type GlobalConfig struct {
 	Debug bool `json:"debug"`
 	Http *HttpConfig `json:"http"`
+	Security *SecurityConfig `json:"security"`
 }
 
 var (

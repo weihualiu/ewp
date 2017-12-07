@@ -42,6 +42,6 @@ func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	w.Write(resp_data)
+	resp_data.WriteToResponse(w)
 	
 }

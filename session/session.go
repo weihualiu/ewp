@@ -3,7 +3,7 @@ package session
 // 会话结构
 
 type Session struct {
-	Sid string
+	Sid []byte
 	Expire int64 //失效时间，指定多长时间后失效
 	ClientAddr string
 	CreateTime string
@@ -32,6 +32,6 @@ func Init() {
 }
 
 
-func NewSession() string {
-	return ""
+func NewSession() []byte {
+	return nil
 }

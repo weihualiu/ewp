@@ -2,7 +2,7 @@ package constant
 
 // define tls global define constant
 
-var (
+const (
 	CLOSE_NOTIFY = byte(0)
 	RESET_FULL_HANDSHAKE = byte(1)
 	UNEXPECTED_MESSAGE = byte(10)
@@ -23,7 +23,7 @@ var (
 	DECRYPT_ERROR = byte(51)
 )
 
-var (
+const (
 	HELLO_REQUEST = byte(0)
 	CLIENT_HELLO = byte(1)
 	SERVER_HELLO = byte(2)
@@ -40,3 +40,32 @@ var (
 	RESOURCE_HASH_RES = byte(14)
 	RESOURCE_H5_HASH = byte(15)
 )
+
+const SERVER_VERSION = []int{1,4}
+
+const (
+	TLS_NULL_WITH_NULL_NULL         uint16 = 0x0000
+	TLS_RSA_WITH_NULL_MD5           uint16 = 0x0001
+	TLS_RSA_WITH_NULL_SHA           uint16 = 0x0002
+	TLS_RSA_WITH_AES_128_CBC_MD5    uint16 = 0x0004
+	TLS_RSA_WITH_AES_128_CBC_SHA    uint16 = 0x0005
+	TLS_RSA_WITH_AES_256_CBC_MD5    uint16 = 0x0006
+	TLS_RSA_WITH_AES_256_CBC_SHA    uint16 = 0x0007
+	TLS_RSA_WITH_DES_CBC_MD5        uint16 = 0x0008
+	TLS_RSA_WITH_DES_CBC_SHA        uint16 = 0x0009
+	TLS_RSA_WITH_3DES_EDE_CBC_MD5   uint16 = 0x000A
+	TLS_RSA_WITH_3DES_EDE_CBC_SHA   uint16 = 0x000B
+	
+	TLS_SM2_WITH_SM4_128_CBC_SM3    uint16 = 0x000C
+	
+	TLS_RSA_WITH_AES_128_CBC_MD5_T  uint16 = 0x0004
+	TLS_RSA_WITH_AES_128_CBC_SHA_T  uint16 = 0x0005
+	TLS_RSA_WITH_AES_256_CBC_MD5_T  uint16 = 0x0006
+	TLS_RSA_WITH_AES_256_CBC_SHA_T  uint16 = 0x0007
+	TLS_RSA_WITH_DES_CBC_MD5_T      uint16 = 0x0008
+	TLS_RSA_WITH_DES_CBC_SHA_T      uint16 = 0x0009
+	TLS_RSA_WITH_3DES_EDE_CBC_MD5_T uint16 = 0x000A
+	TLS_RSA_WITH_3DES_EDE_CBC_SHA_T uint16 = 0x000B
+)
+
+
