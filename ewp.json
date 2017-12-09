@@ -3,7 +3,7 @@
 	"http": {
 	"addr": "0.0.0.0:4002",
 	"timeout": 180
-	}
+	},
 	"security":{
 		"verify":false,
 		"server_cert_file":"public/security/bank_server.crt",
