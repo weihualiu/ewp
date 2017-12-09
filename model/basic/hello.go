@@ -3,19 +3,17 @@ package basic
 // /usr/hello
 
 import (
-	"github.com/weihualiu/ewp/router"
 	log "github.com/Sirupsen/logrus"
 	"net/http"
 	"encoding/base64"
+	"time"
+	"crypto/rand"
+	
+	"github.com/weihualiu/ewp/router"
 	"github.com/weihualiu/ewp/utils"
 	mstring "github.com/weihualiu/toolkit/string"
-	//"bytes"
 	c "github.com/weihualiu/ewp/model/constant"
 	"github.com/weihualiu/ewp/m"
-
-	"encoding/pem"
-	"crypto/x509"
-	"io/ioutil"
 	"github.com/weihualiu/ewp/session"
 )
 
@@ -29,7 +27,7 @@ func init() {
 	router.Register("/user/hello", r)
 }
 
-func helloHandler(data []byte, req *http.Request) (*m.Response, *utils.Error) {
+func helloHandler(data []byte, req *m.Request) (*m.Response, *utils.Error) {
 	buf := make([]byte, 1024)
 
 	_, err := base64.StdEncoding.Decode(buf, data)
@@ -49,15 +47,25 @@ func helloHandler(data []byte, req *http.Request) (*m.Response, *utils.Error) {
 	
 	client_hello_1(buf2, connstate, sec)
 	log.Println("ConnectionState1")
-	server_hello(connstate)
-	server_certificate(connstate, sec)
+	hello := server_hello(connstate)
+	cert := server_certificate(connstate, sec)
+	certreq := certificate_request(connstate, sec)
+	session.InsertConnState(connstate.SessionId, connstate)
+	
+	response := m.ResponseNew()
 	// HTTP HEADER增加第一次请求标识
+	response.Header["is_first"] = req.GetParam("is_first")
 	// 保存客户端信息到会话中
+	session.InsertClientInfo(connstate.SessionId, session.ClientInfoNew(req.Req.Header))
 	// 设置Cookie值
+	response.Header["Set-Cookie"] = "_session_id=" + connstate.SessionId + "; path=/"
 	// 生成失效时间
 	// 组装最终报文并返回
+	response.Write(hello)
+	response.Write(cert)
+	response.Write(certreq)
 	
-	return nil, nil
+	return response, nil
 }
 
 // 获取message data
@@ -77,44 +85,51 @@ func decHello(data []byte) (bool, []byte) {
 func client_hello_1(msgdata []byte, connstate *session.ConnectionState, sec *session.SecOptions) {
 	chello := clientHelloNew()
 	chello.Parse(msgdata)
-	version := select_version(ch.Version, sec.OldestVer)
-	sid := sessions.NewSession()
+	version := session.SelectVersion(chello.Version, sec.OldestVer)
+	sid := session.NewSession()
 	// 判断客户端上送的加密套件是否在服务端支持的范围内
 	// 同时选取一个加密套件
-	cipherSuite := nil
+	cipherSuite := session.CipherSuiteSelect(chello.CipherS)
 	// 
 	connstate.Version = version
 	connstate.Verify = false
-	connstate.ClientRandom = ch.Random
+	connstate.ClientRandom = chello.Random
 	connstate.SessionId = sid
-	connstate.CipherSuite = cipherSuite
+	connstate.CipherS = cipherSuite
 	connstate.VerifyD.Update(enc_msg(c.CLIENT_HELLO, msgdata))
 	
 }
 
 func server_hello(connstate *session.ConnectionState) []byte {
-	sid_len := connstate.SessionId
+	sid_len := len(connstate.SessionId)
 	// <<?BYTE(Major), ?BYTE(Minor),Random:32/binary,?BYTE(SID_length),Session_ID/binary,Cipher_suite/binary>>
-	data := make([]byte, 1+1+32+1+sid_len+len(connstate.CipherSuite))
-	copy(data, connstate.MajorVer)
-	copy(data[1:], connstate.MinorVer)
+	data := make([]byte, 1+1+32+1+sid_len+2)
+	data[0] = connstate.Version.Major
+	data[1] = connstate.Version.Minor
 	copy(data[2:34], random())
-	copy(data[34], uint8(sid_len))
-	copy(data[35:sid_len+35], connstate.SessionId)
-	copy(data[sid_len+35:], connstate.CipherSuite)
+	data[34] = uint8(sid_len)
+	copy(data[35:sid_len+35], []byte(connstate.SessionId))
+	copy(data[sid_len+35:], connstate.CipherS.Bytes())
 	
-	connstate.VerifyD.Update(enc_msg(c.SERVER_HELLO, data))
+	data1 := enc_msg(c.SERVER_HELLO, data)
+	connstate.VerifyD.Update(data1)
+	
+	return data1
+}
+
+// 获取证书ASN1 CERT内容
+func server_certificate(connstate *session.ConnectionState, sec *session.SecOptions) []byte {
+	data := enc_msg(c.CERTIFICATE, sec.ServerCert.Raw)
+	connstate.VerifyD.Update(data)
 	
 	return data
 }
 
-func server_certificate(connstate *session.ConnectionState, sec *session.SecOptions) []byte {
+func certificate_request(connstate *session.ConnectionState, sec *session.SecOptions) []byte {
+	data := enc_msg(c.CERTIFICATE_REQUEST, sec.ServerCert.Raw)
+	connstate.VerifyD.Update(data)
 	
-}
-
-// 选择版本，如果客户端版本低于服务端版本使用客户端版本；否则使用服务端版本
-func select_version(clientver []int, oldver []int) {
-	return clientver
+	return data
 }
 
 // 从HTTP HEADER获取Session

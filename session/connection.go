@@ -5,19 +5,25 @@ import (
 	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
-	"github.com/weihualiu/ewp/model/constant"
+	"hash"
+	"crypto/x509"
+	"crypto/hmac"
+	"io/ioutil"
+	"encoding/pem"
+	
+	c "github.com/weihualiu/ewp/model/constant"
 	g "github.com/weihualiu/ewp/conf"
+	mstring "github.com/weihualiu/toolkit/string"
 )
 
 // 连接状态相关数据
 type ConnectionState struct {
-	MajorVer uint8
-	MinorVer uint8
+	Version SecurityVersion
 	Verify bool
 	ClientRandom []byte
 	ServerRandom []byte
-	SessionId []byte
-	CipherSuite []byte
+	SessionId string
+	CipherS CipherSuite
 	ClientPMS []byte
 	ServerPMS []byte
 	MasterSecret1 []byte
@@ -58,7 +64,7 @@ func (this *VerifyData)Finish(secret []byte) {
 	//prf 伪随机数
 	buf := bytes.NewBuffer(md5)
 	buf.Write(sha)
-	this.Buffer = prf(MasterSecret, []byte("server finished"), buf.Bytes(), 12)
+	this.Buffer = prf(secret, []byte("server finished"), buf.Bytes(), 12)
 }
 
 func (this *VerifyData)FinishClient(client, secret []byte) bool {
@@ -75,7 +81,7 @@ func (this *VerifyData)FinishClient(client, secret []byte) bool {
 // 伪随机数算法
 func prf(secret, label, seed []byte, wantedLength int) []byte {
 	s1 := secret[0 : (len(secret)+1)/2]
-	s2 := [len(secret)/2:]
+	s2 := secret[len(secret)/2:]
 
 	labelAndSeed := make([]byte, len(label)+len(seed))
 	copy(labelAndSeed, label)
@@ -98,7 +104,7 @@ func prf(secret, label, seed []byte, wantedLength int) []byte {
 
 func pHash(result, secret, seed []byte, wantedLength int, hash func() hash.Hash) {
 	// 定义的HMAC算法函数
-	hmac := func(a, b []byte) []byte {
+	hm := func(a, b []byte) []byte {
 		h := hmac.New(hash, a)
 		h.Write(b)
 		return h.Sum(nil)
@@ -119,20 +125,20 @@ func pHash(result, secret, seed []byte, wantedLength int, hash func() hash.Hash)
 	copy(buf, seed)
 	
 	for len(rbuf) < wantedLength {
-		a := hmac(secret, buf)
-		b := hmac(secret, join(a, seed))
+		a := hm(secret, buf)
+		b := hm(secret, join(a, seed))
 		copy(rbuf[len(rbuf):], b)
 		buf = make([]byte, len(a))
 		copy(buf, a)
 	}
 	
 	// 截取长度，返回指定长度
-	copy(result[0:wangtedLength],rbuf[0:wangtedLength])
+	copy(result[0:wantedLength],rbuf[0:wantedLength])
 	
 }
 
-type cipherSuite struct {
-	id uint16
+type CipherSuite struct {
+	Id uint16
 	// the lengths, in bytes, of the key material needed for each component.
 	//keyLen int
 	//macLen int
@@ -145,16 +151,30 @@ type cipherSuite struct {
 	//aead   func(key, fixedNonce []byte) cipher.AEAD
 }
 
-var cipherSuites = []*cipherSuite{
+func (this CipherSuite)Bytes() []byte {
+	return mstring.UInt16ToBytes(this.Id)
+}
+
+// 解析加密套件
+func ParseCipherSuites(data []byte) []CipherSuite {
+	return []CipherSuite{}
+}
+
+// 从加密套件组中选取一个
+func CipherSuiteSelect(client []CipherSuite) CipherSuite {
+	// 定义的已有的cipherSuites
+	return CipherSuite{c.TLS_RSA_WITH_AES_256_CBC_SHA}
+}
+
+var cipherSuites = []*CipherSuite{
 	{c.TLS_RSA_WITH_AES_256_CBC_MD5},
 	{c.TLS_RSA_WITH_AES_256_CBC_SHA},
-	{c.TLS_SM2_WITH_SM4_128_CBC_SM3}
-}
+	{c.TLS_SM2_WITH_SM4_128_CBC_SM3}}
 
 
 // 证书相关
 type SecOptions struct {
-	OldestVer []int  //支持的旧版本
+	OldestVer []SecurityVersion  //支持的旧版本
 	Verify bool  // 是否开启双向验证
 	ServerCert *x509.Certificate // 用户服务证书
 	//ServerKey []byte
@@ -166,7 +186,7 @@ type SecOptions struct {
 func SecOptionsInit() *SecOptions {
 	this := new(SecOptions)
 	this.Verify = g.Config().Security.Verify
-	this.OldestVer = g.Config().Security.OldestVer
+	this.OldestVer = []SecurityVersion{} // g.Config().Security.OldestVer
 	serverCertBuf, _ := ioutil.ReadFile(g.Config().Security.ServerCertPath)
 	block, _ := pem.Decode(serverCertBuf)
 	if block == nil {
@@ -179,3 +199,20 @@ func SecOptionsInit() *SecOptions {
 	this.ServerCert = cert
 	return this
 }
+
+// 信道版本结构
+// 例如 1.4
+type SecurityVersion struct {
+	Major uint8 //主版本
+	Minor uint8 //次版本
+}
+
+func (this SecurityVersion)ToInt() int {
+	return int(this.Major) * 100 + int(this.Minor)
+}
+
+// 选择版本，如果客户端版本低于服务端版本使用客户端版本；否则使用服务端版本
+func SelectVersion(clientver SecurityVersion, oldver []SecurityVersion) SecurityVersion {
+	return clientver
+}
+

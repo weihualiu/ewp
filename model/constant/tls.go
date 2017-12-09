@@ -41,7 +41,7 @@ const (
 	RESOURCE_H5_HASH = byte(15)
 )
 
-const SERVER_VERSION = []int{1,4}
+var SERVER_VERSION = []int{1,4}
 
 const (
 	TLS_NULL_WITH_NULL_NULL         uint16 = 0x0000
