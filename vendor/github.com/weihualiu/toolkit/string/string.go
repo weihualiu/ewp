@@ -2,10 +2,28 @@ package string
 
 import (
 	"encoding/binary"
+	"bytes"
 )
 
 func BytesToUInt32(buf []byte) uint32 {
 	return uint32(binary.BigEndian.Uint32(buf))
+}
+
+func BytesToUInt16(buf []byte) uint16 {
+	return uint16(binary.BigEndian.Uint16(buf))
+}
+
+func IntToBytes(n int) []byte {
+	tmp := int32(n)
+	bytesBuffer := bytes.NewBuffer([]byte{})
+	binary.Write(bytesBuffer, binary.BigEndian, tmp)
+	return bytesBuffer.Bytes()
+}
+
+func UInt16ToBytes(n uint16) []byte {
+	b := bytes.NewBuffer([]byte{})
+	binary.Write(b, binary.BigEndian, n)
+	return b.Bytes()
 }
 
 func BytesToString(c []byte) string {

@@ -8,6 +8,7 @@ import (
 	_ "github.com/weihualiu/ewp/model"
 	_ "github.com/weihualiu/ewp/session"
 	"github.com/weihualiu/ewp/router"
+	"github.com/weihualiu/ewp/m"
 )
 
 
@@ -19,6 +20,7 @@ func Start() {
 
 
 func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("http request:", r)
 	// r.URL.Path
 	rt, err := router.Get(r.URL.Path)
 	if err != nil {
@@ -35,7 +37,7 @@ func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
 		// 执行解密操作
 	}
 	
-	resp_data, e := rt.Handler(body, r)
+	resp_data, e := rt.Handler(body, m.RequestNew(r))
 	if e != nil {
 		log.Println(e.Error())
 		w.Write(e.Error())
