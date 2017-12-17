@@ -32,10 +32,20 @@ func (this Response)WriteToResponse(w http.ResponseWriter) {
 // 封装HTTP请求
 type Request struct {
 	Req *http.Request
+	Body []byte
+	BodyParam map[string]string
 }
 
 func RequestNew(req *http.Request) *Request {
 	return &Request{Req: req}
+}
+
+func (this *Request)SetBody(content []byte) {
+	this.Body = content
+}
+
+func (this *Request)SetBodyParam(content []byte) {
+	// string(content)
 }
 
 func (this Request)GetParam(key string) string {

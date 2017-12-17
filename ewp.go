@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	g "github.com/weihualiu/ewp/conf"
-	"github.com/weihualiu/ewp/session"
 	"github.com/weihualiu/ewp/http"
 	_ "net/http/pprof"
 )
@@ -18,9 +17,7 @@ func main() {
 	} else {
 		g.InitLog("info")
 	}
-	
-	session.Init()
-	
+
 	//utils.TimerStartService()
 	
 	go http.Start()

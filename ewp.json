@@ -6,7 +6,12 @@
 	},
 	"security":{
 		"verify":false,
-		"server_cert_file":"public/security/bank_server.crt",
+		"server_cert_file":"security/server.crt",
+		"server_key_file":"security/key.pem",
+		"server_key_pwd":"mlp2016srv",
+		"ca_cert_file":"security/ca.crt",
+		"issuer_key_file":"security/ca_key.pem",
+		"issuer_key_pwd":"mlp2016",
 		"oldest_supported_ver":[1,0],
 		"client_verify":{
 			"flag":false,
@@ -15,6 +20,7 @@
 			"pass_version":[0,1,2],
 			"pass_platform":[],
 			"error":"ewp_verify_fail"
-		}
+		},
+		"remote_exchange":true
 	}
 }

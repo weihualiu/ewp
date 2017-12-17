@@ -26,6 +26,11 @@ type ClientVerifyConfig struct {
 type SecurityConfig struct {
 	Verify bool `json:"verify"`
 	ServerCertPath string `json:"server_cert_file"`
+	ServerKeyPath string `json:"server_key_file"`
+	ServerKeyPassword string `json:"server_key_pwd"`
+	CaCertPath string `json:"ca_cert_file"`
+	IssuerKeyPath string `json:"issuer_key_file"`
+	IssuerKeyPassword string `json:"issuer_key_pwd"`
 	OldestVer []int `json:"oldest_supported_ver"`
 	ClientVerify *ClientVerifyConfig `json:"client_verify"`
 }
@@ -34,6 +39,7 @@ type GlobalConfig struct {
 	Debug bool `json:"debug"`
 	Http *HttpConfig `json:"http"`
 	Security *SecurityConfig `json:"security"`
+	RemoteExchange bool `json:"remote_exchange"`
 }
 
 var (
