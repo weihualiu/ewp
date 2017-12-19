@@ -2,9 +2,9 @@ package utils
 
 // aes
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"bytes"
 )
 
 func AesEncrypt(plainText, key, iv []byte) ([]byte, error) {
@@ -18,7 +18,6 @@ func AesEncrypt(plainText, key, iv []byte) ([]byte, error) {
 	blockModel.CryptBlocks(cipherText, plainText)
 	return cipherText, nil
 }
-
 
 func pkcs5Padding(cipherText []byte, blockSize int) []byte {
 	padding := blockSize - len(cipherText)%blockSize

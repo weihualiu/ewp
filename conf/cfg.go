@@ -10,36 +10,36 @@ import (
 )
 
 type HttpConfig struct {
-	Addr string `json:"addr"`
-	Timeout int `json:"timeout"`
+	Addr    string `json:"addr"`
+	Timeout int    `json:"timeout"`
 }
 
 type ClientVerifyConfig struct {
-	Flag bool `json:"flag"`
-	ClientVerifyPath string `json:"client_verify_file"`
-	VerifyVersion []int `json:"verify_version"`
-	PassVersion []int `json:"pass_version"`
-	PassPlatForm []string `json:"pass_platform"`
-	ErrTips string `json:"error"`
+	Flag             bool     `json:"flag"`
+	ClientVerifyPath string   `json:"client_verify_file"`
+	VerifyVersion    []int    `json:"verify_version"`
+	PassVersion      []int    `json:"pass_version"`
+	PassPlatForm     []string `json:"pass_platform"`
+	ErrTips          string   `json:"error"`
 }
 
 type SecurityConfig struct {
-	Verify bool `json:"verify"`
-	ServerCertPath string `json:"server_cert_file"`
-	ServerKeyPath string `json:"server_key_file"`
-	ServerKeyPassword string `json:"server_key_pwd"`
-	CaCertPath string `json:"ca_cert_file"`
-	IssuerKeyPath string `json:"issuer_key_file"`
-	IssuerKeyPassword string `json:"issuer_key_pwd"`
-	OldestVer []int `json:"oldest_supported_ver"`
-	ClientVerify *ClientVerifyConfig `json:"client_verify"`
+	Verify            bool                `json:"verify"`
+	ServerCertPath    string              `json:"server_cert_file"`
+	ServerKeyPath     string              `json:"server_key_file"`
+	ServerKeyPassword string              `json:"server_key_pwd"`
+	CaCertPath        string              `json:"ca_cert_file"`
+	IssuerKeyPath     string              `json:"issuer_key_file"`
+	IssuerKeyPassword string              `json:"issuer_key_pwd"`
+	OldestVer         []int               `json:"oldest_supported_ver"`
+	ClientVerify      *ClientVerifyConfig `json:"client_verify"`
 }
 
 type GlobalConfig struct {
-	Debug bool `json:"debug"`
-	Http *HttpConfig `json:"http"`
-	Security *SecurityConfig `json:"security"`
-	RemoteExchange bool `json:"remote_exchange"`
+	Debug          bool            `json:"debug"`
+	Http           *HttpConfig     `json:"http"`
+	Security       *SecurityConfig `json:"security"`
+	RemoteExchange bool            `json:"remote_exchange"`
 }
 
 var (

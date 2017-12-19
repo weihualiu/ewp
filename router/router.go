@@ -2,23 +2,22 @@ package router
 
 import (
 	"errors"
-	"github.com/weihualiu/ewp/utils"
 	"github.com/weihualiu/ewp/m"
+	"github.com/weihualiu/ewp/utils"
 )
 
 var (
 	CTX_BINARY = byte(0x01)
-	CTX_JSON = byte(0x02)
-	CTX_XML = byte(0x03)
-	CTX_URL = byte(0x04)
+	CTX_JSON   = byte(0x02)
+	CTX_XML    = byte(0x03)
+	CTX_URL    = byte(0x04)
 )
 
 type Router struct {
-	CTXType byte  // 内容类型 二进制 JSON XML URL串
-	Encrypt bool
-	CheckValid bool  //session valid
-	Handler func([]byte, *m.Request)(*m.Response, *utils.Error)
-	
+	CTXType    byte // 内容类型 二进制 JSON XML URL串
+	Encrypt    bool
+	CheckValid bool //session valid
+	Handler    func([]byte, *m.Request) (*m.Response, *utils.Error)
 }
 
 var routeres map[string]Router
@@ -30,13 +29,13 @@ func newRouters() {
 }
 
 // 注册路径扩展版
-func RegisterExt(reqpath string, encrypt bool, check bool, handler func([]byte, *m.Request)(*m.Response, *utils.Error)) error {
+func RegisterExt(reqpath string, encrypt bool, check bool, handler func([]byte, *m.Request) (*m.Response, *utils.Error)) error {
 	newRouters()
 	router := Router{
-		CTXType : CTX_URL,
-		Encrypt : encrypt,
-		CheckValid : check,
-		Handler : handler}
+		CTXType:    CTX_URL,
+		Encrypt:    encrypt,
+		CheckValid: check,
+		Handler:    handler}
 	routeres[reqpath] = router
 	return nil
 }
@@ -56,4 +55,3 @@ func Get(reqpath string) (r Router, err error) {
 	}
 	return r, nil
 }
-

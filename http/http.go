@@ -1,25 +1,23 @@
 package http
 
 import (
-	"net/http"
-	g "github.com/weihualiu/ewp/conf"
-	"io/ioutil"
 	log "github.com/Sirupsen/logrus"
-	_ "github.com/weihualiu/ewp/model"
-	"github.com/weihualiu/ewp/sessions"
-	"github.com/weihualiu/ewp/router"
+	g "github.com/weihualiu/ewp/conf"
 	"github.com/weihualiu/ewp/m"
+	_ "github.com/weihualiu/ewp/model"
+	"github.com/weihualiu/ewp/router"
+	"github.com/weihualiu/ewp/sessions"
+	"io/ioutil"
+	"net/http"
 )
-
 
 func Start() {
 	sessions.Init()
-	
+
 	addr := g.Config().Http.Addr
 	http.HandleFunc("/", ParseRequestHandler)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }
-
 
 func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("http request:", r)
@@ -29,12 +27,12 @@ func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("not found router path!"))
 		return
 	}
-	
+
 	body, err := ioutil.ReadAll(r.Body)
-	
+
 	request := m.RequestNew(r)
 	request.Body = body
-	
+
 	if rt.CheckValid {
 		// 校验会话
 		if !validSession(r.Header) {
@@ -42,26 +40,26 @@ func ParseRequestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	if rt.Encrypt {
 		// 执行解密操作
 		request.Body = decrypt(body)
 	}
-	
+
 	defer func() {
 		// 处理handler panic的情况
-		
+
 	}()
-	
+
 	resp_data, e := rt.Handler(request.Body, request)
 	if e != nil {
 		log.Println(e.Error())
 		w.Write(e.Error())
 		return
 	}
-	
+
 	resp_data.WriteToResponse(w)
-	
+
 }
 
 func validSession(header http.Header) bool {

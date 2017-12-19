@@ -10,7 +10,7 @@ import (
 func main() {
 	cfg := flag.String("c", "cfg.json", "configuration file")
 	flag.Parse()
-	
+
 	g.ParseConfig(*cfg)
 	if g.Config().Debug {
 		g.InitLog("debug")
@@ -19,8 +19,8 @@ func main() {
 	}
 
 	//utils.TimerStartService()
-	
+
 	go http.Start()
-	
+
 	select {}
 }

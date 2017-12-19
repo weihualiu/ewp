@@ -1,8 +1,8 @@
 package string
 
 import (
-	"encoding/binary"
 	"bytes"
+	"encoding/binary"
 )
 
 func BytesToUInt32(buf []byte) uint32 {

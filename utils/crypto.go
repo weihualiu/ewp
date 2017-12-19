@@ -14,8 +14,8 @@ func Base64Decode(src []byte) ([]byte, error) {
 	return buf[0:dstlen], nil
 }
 
-func Base64Encode(src []byte) ([]byte) {
-	buf := make([]byte, len(src) * 2)
+func Base64Encode(src []byte) []byte {
+	buf := make([]byte, len(src)*2)
 	base64.StdEncoding.Encode(buf, src)
 	dstlen := base64.StdEncoding.EncodedLen(len(src))
 	return buf[0:dstlen]

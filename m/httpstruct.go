@@ -1,38 +1,47 @@
 package m
 
 import (
-	"net/http"
 	"bytes"
+	"net/http"
 	"strings"
-	
+
 	log "github.com/Sirupsen/logrus"
 )
 
 type Response struct {
 	Header map[string]string
-	Body *bytes.Buffer
+	Body   *bytes.Buffer
+	BodyStr string
 }
 
 func ResponseNew() *Response {
-	return &Response{Header:make(map[string]string), Body:bytes.NewBuffer([]byte{})}
+	return &Response{Header: make(map[string]string), Body: bytes.NewBuffer([]byte{})}
 }
 
-func (this *Response)Write(p []byte) (n int, err error) {
+func (this *Response)SetHeader(key, value string) {
+	this.Header[key] = value
+}
+
+func (this *Response) Write(p []byte) (n int, err error) {
 	return this.Body.Write(p)
 }
 
-func (this Response)WriteToResponse(w http.ResponseWriter) {
-	for k,v := range this.Header {
+func (this Response) WriteToResponse(w http.ResponseWriter) {
+	for k, v := range this.Header {
 		w.Header().Set(k, v)
 	}
 	log.Println("http response body:", this.Body.Bytes())
-	w.Write(this.Body.Bytes())
+	if this.Body == nil || this.Body.Len() == 0 {
+		w.Write([]byte(this.BodyStr))
+	}else{
+		w.Write(this.Body.Bytes())
+	}
 }
 
 // 封装HTTP请求
 type Request struct {
-	Req *http.Request
-	Body []byte
+	Req       *http.Request
+	Body      []byte
 	BodyParam map[string]string
 }
 
@@ -40,33 +49,33 @@ func RequestNew(req *http.Request) *Request {
 	return &Request{Req: req}
 }
 
-func (this *Request)SetBody(content []byte) {
+func (this *Request) SetBody(content []byte) {
 	this.Body = content
 }
 
-func (this *Request)SetBodyParam(content []byte) {
+func (this *Request) SetBodyParam(content []byte) {
 	// string(content)
 }
 
-func (this Request)GetParam(key string) string {
+func (this Request) GetParam(key string) string {
 	return this.Req.URL.Query().Get(key)
 }
 
-func (this Request)GetHeader(key string) string {
+func (this Request) GetHeader(key string) string {
 	return this.Req.Header.Get(key)
 }
 
-func (this Request)GetSessionId() (string, bool) {
+func (this Request) GetSessionId() (string, bool) {
 	s1 := this.Req.Header.Get("X-Emp-Cookie")
-	
+
 	if s1 == "" {
 		s2 := this.Req.Header.Get("Cookie")
 		if s2 == "" {
 			return "", false
-		}else{
-			return strings.Split(strings.Split(s2,";")[0], "=")[1], true
+		} else {
+			return strings.Split(strings.Split(s2, ";")[0], "=")[1], true
 		}
-	}else{
+	} else {
 		return strings.Split(s1, "=")[1], true
 	}
 }
